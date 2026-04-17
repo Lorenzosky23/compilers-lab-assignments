@@ -1,0 +1,7 @@
+# non pushare il gitignore
+!.gitignore
+
+# Ignora tutto sotto build/ tranne build/Makefile
+/build/*
+!/build/Makefile
+!/build/
