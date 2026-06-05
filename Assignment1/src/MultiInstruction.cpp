@@ -15,7 +15,9 @@ struct MultiInstructionPass : PassInfoMixin<MultiInstructionPass> {
 
     // scorro ogni bb di ogni funzione, e ogni istruzione di ogni bb 
     for (auto &BB : F) {
-      for (auto &I : BB) {
+      for (auto It = BB.begin(); It != BB.end();) {
+
+        Instruction &I = *It++;
 
         // controllo se è un operazione matematica (quindi la seconda istruzione del nostro pattern)
         if (auto *sub = dyn_cast<BinaryOperator>(&I)) {

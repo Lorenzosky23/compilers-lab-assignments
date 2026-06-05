@@ -1,4 +1,4 @@
-; ModuleID = 'test_sr.c'
+; ModuleID = 'test_sr.ll'
 source_filename = "test_sr.c"
 target datalayout = "e-m:e-p270:32:32-p271:32:32-p272:64:64-i64:64-i128:128-f80:128-n8:16:32:64-S128"
 target triple = "x86_64-unknown-linux-gnu"
@@ -23,45 +23,48 @@ define dso_local i32 @main(i32 noundef %0, ptr noundef %1) #0 {
   %15 = load i32, ptr %4, align 4
   store i32 %15, ptr %6, align 4
   %16 = load i32, ptr %6, align 4
-  %17 = mul nsw i32 %16, 2
+  %17 = shl i32 %16, 1
   store i32 %17, ptr %7, align 4
   %18 = load i32, ptr %6, align 4
-  %19 = mul nsw i32 %18, 4
+  %19 = shl i32 %18, 2
   store i32 %19, ptr %8, align 4
   %20 = load i32, ptr %6, align 4
-  %21 = mul nsw i32 %20, 8
+  %21 = shl i32 %20, 3
   store i32 %21, ptr %9, align 4
   %22 = load i32, ptr %6, align 4
-  %23 = sdiv i32 %22, 2
+  %23 = ashr i32 %22, 1
   store i32 %23, ptr %10, align 4
   %24 = load i32, ptr %6, align 4
-  %25 = sdiv i32 %24, 4
+  %25 = ashr i32 %24, 2
   store i32 %25, ptr %11, align 4
   %26 = load i32, ptr %6, align 4
-  %27 = mul nsw i32 %26, 3
-  store i32 %27, ptr %12, align 4
-  %28 = load i32, ptr %6, align 4
-  %29 = mul nsw i32 %28, 7
-  store i32 %29, ptr %13, align 4
-  %30 = load i32, ptr %6, align 4
-  %31 = mul nsw i32 %30, 15
-  store i32 %31, ptr %14, align 4
-  %32 = load i32, ptr %7, align 4
-  %33 = load i32, ptr %8, align 4
-  %34 = add nsw i32 %32, %33
-  %35 = load i32, ptr %9, align 4
-  %36 = add nsw i32 %34, %35
-  %37 = load i32, ptr %10, align 4
-  %38 = add nsw i32 %36, %37
-  %39 = load i32, ptr %11, align 4
-  %40 = add nsw i32 %38, %39
-  %41 = load i32, ptr %12, align 4
-  %42 = add nsw i32 %40, %41
-  %43 = load i32, ptr %13, align 4
-  %44 = add nsw i32 %42, %43
-  %45 = load i32, ptr %14, align 4
-  %46 = add nsw i32 %44, %45
-  ret i32 %46
+  %27 = shl i32 %26, 2
+  %28 = sub i32 %27, %26
+  store i32 %28, ptr %12, align 4
+  %29 = load i32, ptr %6, align 4
+  %30 = shl i32 %29, 3
+  %31 = sub i32 %30, %29
+  store i32 %31, ptr %13, align 4
+  %32 = load i32, ptr %6, align 4
+  %33 = shl i32 %32, 4
+  %34 = sub i32 %33, %32
+  store i32 %34, ptr %14, align 4
+  %35 = load i32, ptr %7, align 4
+  %36 = load i32, ptr %8, align 4
+  %37 = add nsw i32 %35, %36
+  %38 = load i32, ptr %9, align 4
+  %39 = add nsw i32 %37, %38
+  %40 = load i32, ptr %10, align 4
+  %41 = add nsw i32 %39, %40
+  %42 = load i32, ptr %11, align 4
+  %43 = add nsw i32 %41, %42
+  %44 = load i32, ptr %12, align 4
+  %45 = add nsw i32 %43, %44
+  %46 = load i32, ptr %13, align 4
+  %47 = add nsw i32 %45, %46
+  %48 = load i32, ptr %14, align 4
+  %49 = add nsw i32 %47, %48
+  ret i32 %49
 }
 
 attributes #0 = { noinline nounwind uwtable "frame-pointer"="all" "min-legal-vector-width"="0" "no-trapping-math"="true" "stack-protector-buffer-size"="8" "target-cpu"="x86-64" "target-features"="+cmov,+cx8,+fxsr,+mmx,+sse,+sse2,+x87" "tune-cpu"="generic" }

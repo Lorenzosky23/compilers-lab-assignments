@@ -1,13 +1,14 @@
 // test per verificare il funzionamento di sr
-int main() {
-    int x = 8;
+int main(int argc, char **argv) {
 
-    // caso 1: moltiplicazioni
+    int x = argc;
+
+    // caso 1: moltiplicazioni per potenze di 2
     int a = x * 2;
     int b = x * 4;
     int c = x * 8;
 
-    // caso 2: divisioni
+    // caso 2: divisioni per potenze di 2
     int d = x / 2;
     int e = x / 4;
 

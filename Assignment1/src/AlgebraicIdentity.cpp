@@ -15,7 +15,9 @@ struct AlgebraicIdentityPass : PassInfoMixin<AlgebraicIdentityPass> {
 
     // scorro tutti i blocchi, per ogni blocco scorro tutte le istruzioni
     for (auto &BB : F) {
-      for (auto &I : BB) {
+      for (auto It = BB.begin(); It != BB.end();) {
+
+        Instruction &I = *It++;
 
         // se l'istruzione è un'istruzione matematica
         if (auto *binOp = dyn_cast<BinaryOperator>(&I)) {
@@ -57,7 +59,7 @@ struct AlgebraicIdentityPass : PassInfoMixin<AlgebraicIdentityPass> {
               if (constOp->isZero()) {
                 binOp->replaceAllUsesWith(op2);
                 binOp->eraseFromParent();
-                modificed = true;
+                modified = true;
                 continue;
               }
             }

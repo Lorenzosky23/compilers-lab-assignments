@@ -1,5 +1,6 @@
 CMakeFiles/Assignment1.dir/src/LocalOpts.cpp.o: \
- /home/susxnnv/Assignment1/src/LocalOpts.cpp /usr/include/stdc-predef.h \
+ /home/susxnnv/compilers-lab-assignments/Assignment1/src/LocalOpts.cpp \
+ /usr/include/stdc-predef.h \
  /home/susxnnv/llvm-19/include/llvm/Passes/PassBuilder.h \
  /home/susxnnv/llvm-19/include/llvm/Analysis/CGSCCPassManager.h \
  /home/susxnnv/llvm-19/include/llvm/ADT/MapVector.h \
@@ -436,8 +437,8 @@ CMakeFiles/Assignment1.dir/src/LocalOpts.cpp.o: \
  /home/susxnnv/llvm-19/include/llvm/Transforms/Utils/ValueMapper.h \
  /home/susxnnv/llvm-19/include/llvm/Passes/PassPlugin.h \
  /home/susxnnv/llvm-19/include/llvm/Support/DynamicLibrary.h \
- /home/susxnnv/Assignment1/src/AlgebraicIdentity.cpp \
- /home/susxnnv/Assignment1/src/StrengthReduction.cpp \
+ /home/susxnnv/compilers-lab-assignments/Assignment1/src/AlgebraicIdentity.cpp \
+ /home/susxnnv/compilers-lab-assignments/Assignment1/src/StrengthReduction.cpp \
  /usr/include/c++/13/cmath /usr/include/math.h \
  /usr/include/x86_64-linux-gnu/bits/math-vector.h \
  /usr/include/x86_64-linux-gnu/bits/libm-simd-decl-stubs.h \
@@ -460,4 +461,4 @@ CMakeFiles/Assignment1.dir/src/LocalOpts.cpp.o: \
  /usr/include/c++/13/tr1/poly_hermite.tcc \
  /usr/include/c++/13/tr1/poly_laguerre.tcc \
  /usr/include/c++/13/tr1/riemann_zeta.tcc \
- /home/susxnnv/Assignment1/src/MultiInstruction.cpp
+ /home/susxnnv/compilers-lab-assignments/Assignment1/src/MultiInstruction.cpp

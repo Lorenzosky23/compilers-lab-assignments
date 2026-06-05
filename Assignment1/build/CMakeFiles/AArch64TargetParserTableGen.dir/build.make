@@ -53,10 +53,10 @@ RM = /usr/bin/cmake -E rm -f
 EQUALS = =
 
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = /home/susxnnv/Assignment1
+CMAKE_SOURCE_DIR = /home/susxnnv/compilers-lab-assignments/Assignment1
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = /home/susxnnv/Assignment1/build
+CMAKE_BINARY_DIR = /home/susxnnv/compilers-lab-assignments/Assignment1/build
 
 # Utility rule file for AArch64TargetParserTableGen.
 
@@ -78,6 +78,6 @@ CMakeFiles/AArch64TargetParserTableGen.dir/clean:
 .PHONY : CMakeFiles/AArch64TargetParserTableGen.dir/clean
 
 CMakeFiles/AArch64TargetParserTableGen.dir/depend:
-	cd /home/susxnnv/Assignment1/build && $(CMAKE_COMMAND) -E cmake_depends "Unix Makefiles" /home/susxnnv/Assignment1 /home/susxnnv/Assignment1 /home/susxnnv/Assignment1/build /home/susxnnv/Assignment1/build /home/susxnnv/Assignment1/build/CMakeFiles/AArch64TargetParserTableGen.dir/DependInfo.cmake "--color=$(COLOR)"
+	cd /home/susxnnv/compilers-lab-assignments/Assignment1/build && $(CMAKE_COMMAND) -E cmake_depends "Unix Makefiles" /home/susxnnv/compilers-lab-assignments/Assignment1 /home/susxnnv/compilers-lab-assignments/Assignment1 /home/susxnnv/compilers-lab-assignments/Assignment1/build /home/susxnnv/compilers-lab-assignments/Assignment1/build /home/susxnnv/compilers-lab-assignments/Assignment1/build/CMakeFiles/AArch64TargetParserTableGen.dir/DependInfo.cmake "--color=$(COLOR)"
 .PHONY : CMakeFiles/AArch64TargetParserTableGen.dir/depend
 

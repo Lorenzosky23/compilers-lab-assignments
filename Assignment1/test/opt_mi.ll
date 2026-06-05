@@ -1,18 +1,14 @@
-; ModuleID = 'test_ai.ll'
-source_filename = "test_ai.c"
+; ModuleID = 'test_mi.ll'
+source_filename = "test_mi.c"
 target datalayout = "e-m:e-p270:32:32-p271:32:32-p272:64:64-i64:64-i128:128-f80:128-n8:16:32:64-S128"
 target triple = "x86_64-unknown-linux-gnu"
 
 ; Function Attrs: noinline nounwind uwtable
 define dso_local i32 @main() #0 {
-  %1 = add nsw i32 10, 0
-  %2 = add nsw i32 0, 10
-  %3 = mul nsw i32 10, 1
-  %4 = mul nsw i32 1, 10
-  %5 = add nsw i32 %1, %2
-  %6 = add nsw i32 %5, %3
-  %7 = add nsw i32 %6, %4
-  ret i32 %7
+  %1 = add nsw i32 10, 5
+  %2 = add nsw i32 10, 3
+  %3 = add nsw i32 10, 10
+  ret i32 %3
 }
 
 attributes #0 = { noinline nounwind uwtable "frame-pointer"="all" "min-legal-vector-width"="0" "no-trapping-math"="true" "stack-protector-buffer-size"="8" "target-cpu"="x86-64" "target-features"="+cmov,+cx8,+fxsr,+mmx,+sse,+sse2,+x87" "tune-cpu"="generic" }

@@ -53,10 +53,10 @@ RM = /usr/bin/cmake -E rm -f
 EQUALS = =
 
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = /home/susxnnv/Assignment1
+CMAKE_SOURCE_DIR = /home/susxnnv/compilers-lab-assignments/Assignment1
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = /home/susxnnv/Assignment1/build
+CMAKE_BINARY_DIR = /home/susxnnv/compilers-lab-assignments/Assignment1/build
 
 # Include any dependencies generated for this target.
 include CMakeFiles/Assignment1.dir/depend.make
@@ -70,60 +70,60 @@ include CMakeFiles/Assignment1.dir/progress.make
 include CMakeFiles/Assignment1.dir/flags.make
 
 CMakeFiles/Assignment1.dir/src/AlgebraicIdentity.cpp.o: CMakeFiles/Assignment1.dir/flags.make
-CMakeFiles/Assignment1.dir/src/AlgebraicIdentity.cpp.o: /home/susxnnv/Assignment1/src/AlgebraicIdentity.cpp
+CMakeFiles/Assignment1.dir/src/AlgebraicIdentity.cpp.o: /home/susxnnv/compilers-lab-assignments/Assignment1/src/AlgebraicIdentity.cpp
 CMakeFiles/Assignment1.dir/src/AlgebraicIdentity.cpp.o: CMakeFiles/Assignment1.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/susxnnv/Assignment1/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Building CXX object CMakeFiles/Assignment1.dir/src/AlgebraicIdentity.cpp.o"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/Assignment1.dir/src/AlgebraicIdentity.cpp.o -MF CMakeFiles/Assignment1.dir/src/AlgebraicIdentity.cpp.o.d -o CMakeFiles/Assignment1.dir/src/AlgebraicIdentity.cpp.o -c /home/susxnnv/Assignment1/src/AlgebraicIdentity.cpp
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/susxnnv/compilers-lab-assignments/Assignment1/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Building CXX object CMakeFiles/Assignment1.dir/src/AlgebraicIdentity.cpp.o"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/Assignment1.dir/src/AlgebraicIdentity.cpp.o -MF CMakeFiles/Assignment1.dir/src/AlgebraicIdentity.cpp.o.d -o CMakeFiles/Assignment1.dir/src/AlgebraicIdentity.cpp.o -c /home/susxnnv/compilers-lab-assignments/Assignment1/src/AlgebraicIdentity.cpp
 
 CMakeFiles/Assignment1.dir/src/AlgebraicIdentity.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/Assignment1.dir/src/AlgebraicIdentity.cpp.i"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/susxnnv/Assignment1/src/AlgebraicIdentity.cpp > CMakeFiles/Assignment1.dir/src/AlgebraicIdentity.cpp.i
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/susxnnv/compilers-lab-assignments/Assignment1/src/AlgebraicIdentity.cpp > CMakeFiles/Assignment1.dir/src/AlgebraicIdentity.cpp.i
 
 CMakeFiles/Assignment1.dir/src/AlgebraicIdentity.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/Assignment1.dir/src/AlgebraicIdentity.cpp.s"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/susxnnv/Assignment1/src/AlgebraicIdentity.cpp -o CMakeFiles/Assignment1.dir/src/AlgebraicIdentity.cpp.s
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/susxnnv/compilers-lab-assignments/Assignment1/src/AlgebraicIdentity.cpp -o CMakeFiles/Assignment1.dir/src/AlgebraicIdentity.cpp.s
 
 CMakeFiles/Assignment1.dir/src/StrengthReduction.cpp.o: CMakeFiles/Assignment1.dir/flags.make
-CMakeFiles/Assignment1.dir/src/StrengthReduction.cpp.o: /home/susxnnv/Assignment1/src/StrengthReduction.cpp
+CMakeFiles/Assignment1.dir/src/StrengthReduction.cpp.o: /home/susxnnv/compilers-lab-assignments/Assignment1/src/StrengthReduction.cpp
 CMakeFiles/Assignment1.dir/src/StrengthReduction.cpp.o: CMakeFiles/Assignment1.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/susxnnv/Assignment1/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Building CXX object CMakeFiles/Assignment1.dir/src/StrengthReduction.cpp.o"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/Assignment1.dir/src/StrengthReduction.cpp.o -MF CMakeFiles/Assignment1.dir/src/StrengthReduction.cpp.o.d -o CMakeFiles/Assignment1.dir/src/StrengthReduction.cpp.o -c /home/susxnnv/Assignment1/src/StrengthReduction.cpp
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/susxnnv/compilers-lab-assignments/Assignment1/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Building CXX object CMakeFiles/Assignment1.dir/src/StrengthReduction.cpp.o"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/Assignment1.dir/src/StrengthReduction.cpp.o -MF CMakeFiles/Assignment1.dir/src/StrengthReduction.cpp.o.d -o CMakeFiles/Assignment1.dir/src/StrengthReduction.cpp.o -c /home/susxnnv/compilers-lab-assignments/Assignment1/src/StrengthReduction.cpp
 
 CMakeFiles/Assignment1.dir/src/StrengthReduction.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/Assignment1.dir/src/StrengthReduction.cpp.i"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/susxnnv/Assignment1/src/StrengthReduction.cpp > CMakeFiles/Assignment1.dir/src/StrengthReduction.cpp.i
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/susxnnv/compilers-lab-assignments/Assignment1/src/StrengthReduction.cpp > CMakeFiles/Assignment1.dir/src/StrengthReduction.cpp.i
 
 CMakeFiles/Assignment1.dir/src/StrengthReduction.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/Assignment1.dir/src/StrengthReduction.cpp.s"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/susxnnv/Assignment1/src/StrengthReduction.cpp -o CMakeFiles/Assignment1.dir/src/StrengthReduction.cpp.s
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/susxnnv/compilers-lab-assignments/Assignment1/src/StrengthReduction.cpp -o CMakeFiles/Assignment1.dir/src/StrengthReduction.cpp.s
 
 CMakeFiles/Assignment1.dir/src/MultiInstruction.cpp.o: CMakeFiles/Assignment1.dir/flags.make
-CMakeFiles/Assignment1.dir/src/MultiInstruction.cpp.o: /home/susxnnv/Assignment1/src/MultiInstruction.cpp
+CMakeFiles/Assignment1.dir/src/MultiInstruction.cpp.o: /home/susxnnv/compilers-lab-assignments/Assignment1/src/MultiInstruction.cpp
 CMakeFiles/Assignment1.dir/src/MultiInstruction.cpp.o: CMakeFiles/Assignment1.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/susxnnv/Assignment1/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_3) "Building CXX object CMakeFiles/Assignment1.dir/src/MultiInstruction.cpp.o"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/Assignment1.dir/src/MultiInstruction.cpp.o -MF CMakeFiles/Assignment1.dir/src/MultiInstruction.cpp.o.d -o CMakeFiles/Assignment1.dir/src/MultiInstruction.cpp.o -c /home/susxnnv/Assignment1/src/MultiInstruction.cpp
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/susxnnv/compilers-lab-assignments/Assignment1/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_3) "Building CXX object CMakeFiles/Assignment1.dir/src/MultiInstruction.cpp.o"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/Assignment1.dir/src/MultiInstruction.cpp.o -MF CMakeFiles/Assignment1.dir/src/MultiInstruction.cpp.o.d -o CMakeFiles/Assignment1.dir/src/MultiInstruction.cpp.o -c /home/susxnnv/compilers-lab-assignments/Assignment1/src/MultiInstruction.cpp
 
 CMakeFiles/Assignment1.dir/src/MultiInstruction.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/Assignment1.dir/src/MultiInstruction.cpp.i"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/susxnnv/Assignment1/src/MultiInstruction.cpp > CMakeFiles/Assignment1.dir/src/MultiInstruction.cpp.i
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/susxnnv/compilers-lab-assignments/Assignment1/src/MultiInstruction.cpp > CMakeFiles/Assignment1.dir/src/MultiInstruction.cpp.i
 
 CMakeFiles/Assignment1.dir/src/MultiInstruction.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/Assignment1.dir/src/MultiInstruction.cpp.s"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/susxnnv/Assignment1/src/MultiInstruction.cpp -o CMakeFiles/Assignment1.dir/src/MultiInstruction.cpp.s
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/susxnnv/compilers-lab-assignments/Assignment1/src/MultiInstruction.cpp -o CMakeFiles/Assignment1.dir/src/MultiInstruction.cpp.s
 
 CMakeFiles/Assignment1.dir/src/LocalOpts.cpp.o: CMakeFiles/Assignment1.dir/flags.make
-CMakeFiles/Assignment1.dir/src/LocalOpts.cpp.o: /home/susxnnv/Assignment1/src/LocalOpts.cpp
+CMakeFiles/Assignment1.dir/src/LocalOpts.cpp.o: /home/susxnnv/compilers-lab-assignments/Assignment1/src/LocalOpts.cpp
 CMakeFiles/Assignment1.dir/src/LocalOpts.cpp.o: CMakeFiles/Assignment1.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/susxnnv/Assignment1/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_4) "Building CXX object CMakeFiles/Assignment1.dir/src/LocalOpts.cpp.o"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/Assignment1.dir/src/LocalOpts.cpp.o -MF CMakeFiles/Assignment1.dir/src/LocalOpts.cpp.o.d -o CMakeFiles/Assignment1.dir/src/LocalOpts.cpp.o -c /home/susxnnv/Assignment1/src/LocalOpts.cpp
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/susxnnv/compilers-lab-assignments/Assignment1/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_4) "Building CXX object CMakeFiles/Assignment1.dir/src/LocalOpts.cpp.o"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/Assignment1.dir/src/LocalOpts.cpp.o -MF CMakeFiles/Assignment1.dir/src/LocalOpts.cpp.o.d -o CMakeFiles/Assignment1.dir/src/LocalOpts.cpp.o -c /home/susxnnv/compilers-lab-assignments/Assignment1/src/LocalOpts.cpp
 
 CMakeFiles/Assignment1.dir/src/LocalOpts.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/Assignment1.dir/src/LocalOpts.cpp.i"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/susxnnv/Assignment1/src/LocalOpts.cpp > CMakeFiles/Assignment1.dir/src/LocalOpts.cpp.i
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/susxnnv/compilers-lab-assignments/Assignment1/src/LocalOpts.cpp > CMakeFiles/Assignment1.dir/src/LocalOpts.cpp.i
 
 CMakeFiles/Assignment1.dir/src/LocalOpts.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/Assignment1.dir/src/LocalOpts.cpp.s"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/susxnnv/Assignment1/src/LocalOpts.cpp -o CMakeFiles/Assignment1.dir/src/LocalOpts.cpp.s
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/susxnnv/compilers-lab-assignments/Assignment1/src/LocalOpts.cpp -o CMakeFiles/Assignment1.dir/src/LocalOpts.cpp.s
 
 # Object files for target Assignment1
 Assignment1_OBJECTS = \
@@ -141,7 +141,7 @@ libAssignment1.so: CMakeFiles/Assignment1.dir/src/MultiInstruction.cpp.o
 libAssignment1.so: CMakeFiles/Assignment1.dir/src/LocalOpts.cpp.o
 libAssignment1.so: CMakeFiles/Assignment1.dir/build.make
 libAssignment1.so: CMakeFiles/Assignment1.dir/link.txt
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --bold --progress-dir=/home/susxnnv/Assignment1/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_5) "Linking CXX shared library libAssignment1.so"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --bold --progress-dir=/home/susxnnv/compilers-lab-assignments/Assignment1/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_5) "Linking CXX shared library libAssignment1.so"
 	$(CMAKE_COMMAND) -E cmake_link_script CMakeFiles/Assignment1.dir/link.txt --verbose=$(VERBOSE)
 
 # Rule to build all files generated by this target.
@@ -153,6 +153,6 @@ CMakeFiles/Assignment1.dir/clean:
 .PHONY : CMakeFiles/Assignment1.dir/clean
 
 CMakeFiles/Assignment1.dir/depend:
-	cd /home/susxnnv/Assignment1/build && $(CMAKE_COMMAND) -E cmake_depends "Unix Makefiles" /home/susxnnv/Assignment1 /home/susxnnv/Assignment1 /home/susxnnv/Assignment1/build /home/susxnnv/Assignment1/build /home/susxnnv/Assignment1/build/CMakeFiles/Assignment1.dir/DependInfo.cmake "--color=$(COLOR)"
+	cd /home/susxnnv/compilers-lab-assignments/Assignment1/build && $(CMAKE_COMMAND) -E cmake_depends "Unix Makefiles" /home/susxnnv/compilers-lab-assignments/Assignment1 /home/susxnnv/compilers-lab-assignments/Assignment1 /home/susxnnv/compilers-lab-assignments/Assignment1/build /home/susxnnv/compilers-lab-assignments/Assignment1/build /home/susxnnv/compilers-lab-assignments/Assignment1/build/CMakeFiles/Assignment1.dir/DependInfo.cmake "--color=$(COLOR)"
 .PHONY : CMakeFiles/Assignment1.dir/depend
 

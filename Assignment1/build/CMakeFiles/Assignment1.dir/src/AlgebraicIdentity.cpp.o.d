@@ -1,5 +1,5 @@
 CMakeFiles/Assignment1.dir/src/AlgebraicIdentity.cpp.o: \
- /home/susxnnv/Assignment1/src/AlgebraicIdentity.cpp \
+ /home/susxnnv/compilers-lab-assignments/Assignment1/src/AlgebraicIdentity.cpp \
  /usr/include/stdc-predef.h \
  /home/susxnnv/llvm-19/include/llvm/IR/PassManager.h \
  /home/susxnnv/llvm-19/include/llvm/ADT/DenseMap.h \
