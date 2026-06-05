@@ -87,6 +87,6 @@ attributes #2 = { mustprogress noinline norecurse uwtable "frame-pointer"="all" 
 !2 = !{i32 7, !"PIE Level", i32 2}
 !3 = !{i32 7, !"uwtable", i32 2}
 !4 = !{i32 7, !"frame-pointer", i32 2}
-!5 = !{!"Ubuntu clang version 18.1.3 (1ubuntu1)"}
+!5 = !{!"Ubuntu clang version 21.1.8 (6ubuntu1)"}
 !6 = distinct !{!6, !7}
 !7 = !{!"llvm.loop.mustprogress"}

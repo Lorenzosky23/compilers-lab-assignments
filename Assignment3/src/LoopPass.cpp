@@ -13,12 +13,12 @@ using namespace llvm;
 
 namespace {
 
-// Rinominato per evitare conflitti con il passo ufficiale LLVM
-struct CustomLICMPass : public PassInfoMixin<CustomLICMPass> {
+
+struct LoopPass : public PassInfoMixin<LoopPass> {
     
-    // Funzione helper per verificare se un valore è loop-invariant
+    // Funzione per verificare se un valore è loop-invariant
     bool isValueInvariant(Value *V, Loop *L, const std::set<Instruction*> &Invariants) {
-        // Se è una costante o un argomento della funzione, è fuori dal loop ed è invariante
+        // Se è una costante o un argomento della funzione, è invariante
         if (isa<Constant>(V) || isa<Argument>(V)) {
             return true;
         }
@@ -43,14 +43,13 @@ struct CustomLICMPass : public PassInfoMixin<CustomLICMPass> {
         LoopInfo &LI = AM.getResult<LoopAnalysis>(F); 
         DominatorTree &DT = AM.getResult<DominatorTreeAnalysis>(F);
 
-        errs() << "\nAnalisi della funzione: " << F.getName() << "\n";
 
         if (LI.empty()) {
             errs() << "Nessun Loop trovato in questa funzione.\n";
             return PreservedAnalyses::all();
         }
 
-        errs() << "-> Trovati dei loop! Inizio ottimizzazione Custom LICM...\n";
+       
         bool Changed = false;
 
         // Iteriamo su tutti i loop della funzione
@@ -71,9 +70,9 @@ struct CustomLICMPass : public PassInfoMixin<CustomLICMPass> {
             }
             errs() << " [*] Preheader trovato correttamente.\n";
 
-            // -----------------------------------------------------------------
-            // FASE 1: Identificazione delle istruzioni Loop-Invariant
-            // -----------------------------------------------------------------
+            
+            // IDENTIFICAZIONE DELLE ISTRUZIONI LOOP-INVARIANT
+            
             std::set<Instruction*> InvariantInstructions;
             bool NewInvariantFound;
 
@@ -83,7 +82,10 @@ struct CustomLICMPass : public PassInfoMixin<CustomLICMPass> {
 
                 for (BasicBlock *BB : L->blocks()) {
                     for (Instruction &I : *BB) {
-                       
+                        //salto istruzioni come salti, o operazioni di memoria, o con side effect (es. i++)
+                        if (I.mayHaveSideEffects() || I.mayReadFromMemory() || I.isTerminator()) {
+                            continue;
+                        }
                         // Se è già marcata, saltiamo
                         if (InvariantInstructions.count(&I)) {
                             continue;
@@ -101,16 +103,16 @@ struct CustomLICMPass : public PassInfoMixin<CustomLICMPass> {
                         if (AllOperandsInvariant) {
                             InvariantInstructions.insert(&I);
                             NewInvariantFound = true;
-                            errs() << " -> Trovata istruzione Invariante: " << I << "\n";
+                            errs() << "Trovata istruzione Invariante: " << I << "\n";
                         }
                     }
                 }
             } while (NewInvariantFound);
 
-            // -----------------------------------------------------------------
-            // FASE 2 & 3: Controllo delle Condizioni di Dominanza e Code Motion
-            // -----------------------------------------------------------------
-            // Raccogliamo le uscite del loop
+            
+            // CONDIZIONI DI DOMINANZA ED EVENTUALE CODE MOTION
+           
+
             SmallVector<BasicBlock*, 4> ExitBlocks;
             L->getExitBlocks(ExitBlocks);
 
@@ -121,7 +123,7 @@ struct CustomLICMPass : public PassInfoMixin<CustomLICMPass> {
                 for (Instruction &I : *BB) {
                     if (InvariantInstructions.count(&I)) {
                         
-                        // Condizione A: Il blocco dell'istruzione domina tutte le uscite del loop
+                        // Verifico se il blocco dell'istruzione domina tutte le uscite del loop
                         bool DominatesAllExits = true;
                         for (BasicBlock *ExitBB : ExitBlocks) {
                             if (!DT.dominates(I.getParent(), ExitBB)) {
@@ -130,54 +132,48 @@ struct CustomLICMPass : public PassInfoMixin<CustomLICMPass> {
                             }
                         }
 
-                    if (!DominatesAllExits) {
-                        // Se non domina tutte le uscite, verifichiamo se almeno è "dead" fuori dal loop
-                        bool UsedOutsideLoop = false;
-                        for (User *U : I.users()) {
-                            if (Instruction *UserInst = dyn_cast<Instruction>(U)) {
-                                if (!L->contains(UserInst->getParent())) {
-                                    UsedOutsideLoop = true;
-                                    break;
+                        if (!DominatesAllExits) {
+                            // verifichiamo se è "dead" fuori dal loop
+                            bool UsedOutsideLoop = false;
+                            for (User *U : I.users()) {
+                                if (Instruction *UserInst = dyn_cast<Instruction>(U)) {
+                                    //Se c'è anche un solo utilizzo di UserInst in un blocco che non fa parte del loop
+                                    if (!L->contains(UserInst->getParent())) {
+                                        UsedOutsideLoop = true;
+                                        break;
+                                    }
                                 }
+                            }
+
+                            if (UsedOutsideLoop) {
+                                // Fallisce: Non domina le uscite ed è usata fuori
+                                continue;
+                            } else {
+                                errs() << "L'istruzione [" << I << "] e' dead fuori dal loop, quindi posso spostarla\n";
                             }
                         }
 
-                        if (UsedOutsideLoop) {
-                            errs() << " [!] Non si puo' spostare (non domina le uscite ed e' usata fuori): " << I << "\n";
-                            continue;
-                        } else {
-                            errs() << " [*] Non domina le uscite, ma e' dead fuori dal loop. Procedo!\n";
-                        }
-                    }
-
-                        // Condizione B: La definizione domina tutti i blocchi in cui viene usata nel loop
+                        // La definizione domina tutti i blocchi in cui viene usata nel loop
                         bool DominatesAllUses = true;
                         for (User *U : I.users()) {
                             if (Instruction *UserInst = dyn_cast<Instruction>(U)) {
                                 // Ci interessano solo gli usi interni al loop
                                 if (L->contains(UserInst->getParent())) {
-                                    // Controllo speciale per i nodi PHI: la dominanza va verificata sul blocco precedente
-                                    if (PHINode *PN = dyn_cast<PHINode>(UserInst)) {
-                                        // Verifica se domina il blocco antecedente corrispondente all'operando
-                                        for (unsigned unsigned_op = 0; unsigned_op < PN->getNumIncomingValues(); ++unsigned_op) {
-                                            if (PN->getIncomingValue(unsigned_op) == &I) {
-                                                if (!DT.dominates(I.getParent(), PN->getIncomingBlock(unsigned_op))) {
-                                                    DominatesAllUses = false;
-                                                    break;
-                                                }
-                                            }
-                                        }
-                                    } else if (!DT.dominates(I.getParent(), UserInst->getParent())) {
+                                    
+                                    if (!DT.dominates(I.getParent(), UserInst->getParent())) {
                                         DominatesAllUses = false;
                                         break;
                                     }
+                                
                                 }
                             }
                         }
 
                         if (!DominatesAllUses) {
-                            errs() << " [!] Non si puo' spostare (non domina tutti i suoi usi): " << I << "\n";
+                            // Fallisce: Non domina tutti i suoi usi interni
                             continue;
+                        } else {
+                            errs() << "L'istruzione [" << I<< "] si puo' spostare (domina tutti i suoi usi): \n";    
                         }
 
                         // Superate le verifiche, l'istruzione è candidata allo spostamento
@@ -206,13 +202,13 @@ struct CustomLICMPass : public PassInfoMixin<CustomLICMPass> {
 } // end anonymous namespace
 
 extern "C" LLVM_ATTRIBUTE_WEAK ::llvm::PassPluginLibraryInfo llvmGetPassPluginInfo() {
-    return {LLVM_PLUGIN_API_VERSION, "CustomLICMPass", LLVM_VERSION_STRING,
+    return {LLVM_PLUGIN_API_VERSION, "LoopPass", LLVM_VERSION_STRING,
             [](PassBuilder &PB) {
                 PB.registerPipelineParsingCallback(
                     [](StringRef Name, FunctionPassManager &FPM,
                        ArrayRef<PassBuilder::PipelineElement>) {
-                        if (Name == "custom-licm") {
-                            FPM.addPass(CustomLICMPass());
+                        if (Name == "LoopPass") {
+                            FPM.addPass(LoopPass());
                             return true;
                         }
                         return false;
