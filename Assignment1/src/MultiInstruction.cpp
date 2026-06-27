@@ -7,66 +7,128 @@ using namespace llvm;
 
 struct MultiInstructionPass : PassInfoMixin<MultiInstructionPass> {
 
-  // per ogni funzione
   PreservedAnalyses run(Function &F, FunctionAnalysisManager &) {
-
-    // flag di modifica
     bool modified = false;
 
-    // scorro ogni bb di ogni funzione, e ogni istruzione di ogni bb 
     for (auto &BB : F) {
       for (auto It = BB.begin(); It != BB.end();) {
+        
+        // 'c' è l'istruzione che stiamo guardando in questo momento
+        Instruction &c_inst = *It++;
 
-        Instruction &I = *It++;
+        auto *c = dyn_cast<BinaryOperator>(&c_inst);
+        if (!c) continue;
 
-        // controllo se è un operazione matematica (quindi la seconda istruzione del nostro pattern)
-        if (auto *sub = dyn_cast<BinaryOperator>(&I)) {
+        Instruction::BinaryOps Opcode = c->getOpcode();
 
-          // controllo se è una sottrazione
-          if (sub->getOpcode() == Instruction::Sub) {
+        // =====================================================================
+        // CASO 1: Esempio del testo -> [ a = b + 1,  c = a - 1 ]  =>  c = b
+        // =====================================================================
+        if (Opcode == Instruction::Sub) {
+          
+          // In (a - 1), l'operando destro (1) DEVE essere una costante
+          auto *costante_sub = dyn_cast<ConstantInt>(c->getOperand(1));
+          
+          // L'operando sinistro (0) DEVE essere l'istruzione 'a'
+          auto *a = dyn_cast<BinaryOperator>(c->getOperand(0));
 
-            // inserisco i valori all'interno di operando1 e operando2 di istruzione 2
-            Value *op1 = sub->getOperand(0);
-            Value *op2 = sub->getOperand(1);
+          // Verifichiamo che 'a' sia davvero un'Addizione
+          if (costante_sub && a && a->getOpcode() == Instruction::Add) {
+            
+            Value *op0 = a->getOperand(0);
+            Value *op1 = a->getOperand(1);
 
-            // op1 deve essere il risultato di una add (quindi la prima istruzione del mio pattern)
-            if (auto *add = dyn_cast<BinaryOperator>(op1)) {
+            // Commutatività di 'a': l'addizione può essere (b + 1) oppure (1 + b)
+            ConstantInt *costante_add = dyn_cast<ConstantInt>(op1);
+            Value *b = op0;
 
-              // controllo che operando1 sia il risultato di una add
-              if (add->getOpcode() == Instruction::Add) {
+            if (!costante_add) { // Se a destra non c'era il +1, proviamo a sinistra
+              costante_add = dyn_cast<ConstantInt>(op0);
+              b = op1;
+            }
 
-                // inserisco il primo operando della prima istruzione, in b
-                // inserisco il secondo operando della prima istruzione, in n1
-                // inserisco il secondo operando della seconda istruzione, in n2
-                Value *b = add->getOperand(0);
-                Value *n1 = add->getOperand(1);
-                Value *n2 = op2;
-
-                // controlla che n sia costante (non deve cambiare ovviamente)
-                if (auto *c1 = dyn_cast<ConstantInt>(n1)) {
-                  if (auto *c2 = dyn_cast<ConstantInt>(n2)) {
-
-                    // controlla n1 ed n2 siano uguali
-                    if (c1->getSExtValue() == c2->getSExtValue()) {
-
-                      // sostituisco tutti gli usi
-                      // sostituisci tutti i c direttamente con b
-                      sub->replaceAllUsesWith(b);
-                      sub->eraseFromParent();
-
-                      modified = true;
-                      continue;
-                    }
-                  }
-                }
-              }
+            // Se il "+1" dell'addizione e il "-1" della sottrazione sono lo stesso numero:
+            if (costante_add && costante_add->getValue() == costante_sub->getValue()) {
+              c->replaceAllUsesWith(b);
+              //a questo punto dopo replacealluses c non è più utilizzata perchè rimpiazzata. 
+              c->eraseFromParent();
+              modified = true;
+              errs()<<"Trovata caso seconda istruzione sub ";
+              continue;
             }
           }
         }
+
+        // =====================================================================
+        // CASO 2: Il simmetrico   -> [ a = b - 1,  c = a + 1 ]  =>  c = b
+        // =====================================================================
+        else if (Opcode == Instruction::Add) {
+          
+          Value *op0 = c->getOperand(0);
+          Value *op1 = c->getOperand(1);
+
+          // Commutatività di 'c': l'addizione esterna può essere (a + 1) oppure (1 + a)
+          ConstantInt *costante_add = dyn_cast<ConstantInt>(op1);
+          BinaryOperator *a = dyn_cast<BinaryOperator>(op0);
+            //a qui è intesa come variabile o costante
+          if (!costante_add || !a) {
+            costante_add = dyn_cast<ConstantInt>(op0);
+            a = dyn_cast<BinaryOperator>(op1);
+          }
+
+          // Verifichiamo che 'a' (operazione) sia una Sottrazione
+          if (costante_add && a && a->getOpcode() == Instruction::Sub) {
+            
+            // Nella sottrazione (b - 1) la costante è fissa a destra, 'b' a sinistra
+            Value *b = a->getOperand(0);
+            auto *costante_sub = dyn_cast<ConstantInt>(a->getOperand(1));
+
+            if (costante_sub && costante_sub->getValue() == costante_add->getValue()) {
+              c->replaceAllUsesWith(b);
+              c->eraseFromParent();
+              modified = true;
+               errs()<<"Trovata caso seconda istruzione add ";
+              continue;
+            }
+          }
+        }
+
+        // =====================================================================
+        // CASO 3: Moltiplicazione -> [ a = b * 2,  c = a / 2 ]  =>  c = b
+        // =====================================================================
+        else if (Opcode == Instruction::SDiv || Opcode == Instruction::UDiv) {
+          
+          // Nella divisione (a / 2) la costante sta per forza a destra
+          auto *costante_div = dyn_cast<ConstantInt>(c->getOperand(1));
+          auto *a = dyn_cast<BinaryOperator>(c->getOperand(0));
+
+          // Sicurezza: costante_div non deve essere 0
+          if (costante_div && !costante_div->isZero() && a && a->getOpcode() == Instruction::Mul) {
+            //intesi come gli operazndi della moltiplicazione a
+            Value *op0 = a->getOperand(0);
+            Value *op1 = a->getOperand(1);
+
+            // Commutatività di 'a': (b * 2) oppure (2 * b)
+            ConstantInt *costante_mul = dyn_cast<ConstantInt>(op1);
+            Value *b = op0;
+
+            if (!costante_mul) {
+              costante_mul = dyn_cast<ConstantInt>(op0);
+              b = op1;
+            }
+
+            if (costante_mul && costante_mul->getValue() == costante_div->getValue()) {
+              c->replaceAllUsesWith(b);
+              c->eraseFromParent();
+              modified = true;
+              continue;
+            }
+          }
+        }
+
       }
     }
 
-    // restituisce in base a se è stato modificato o meno 
     return modified ? PreservedAnalyses::none() : PreservedAnalyses::all();
   }
 

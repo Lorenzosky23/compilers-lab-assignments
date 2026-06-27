@@ -1,0 +1,16 @@
+# Escludi tutte le cartelle build a qualsiasi livello
+build/
+
+# Librerie e binari compilati localmente
+*.so
+*.o
+*.out
+
+# Bitcode e IR intermedi di test
+*.ll
+*.bc
+*.s
+
+# File di sistema
+.DS_Store
+*~
