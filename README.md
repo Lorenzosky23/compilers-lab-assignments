@@ -52,15 +52,29 @@ opt -passes=mem2reg -S nome_test.ll -o nome_test.m2r.ll
 ```
 
 3. Eseguire il passo di ottimizzazione personalizzato
-Ora puoi applicare la tua libreria compilata al file IR (utilizzando l'IR base per A1, o l'IR passato nel mem2reg per A3/A4). Usa il flag -load-pass-plugin puntando alla cartella build/ del livello superiore (../build/) e specifica il nome esatto del passo registrato nel C++.
+Usa il flag -load-pass-plugin puntando alla cartella build/ del livello superiore (../build/) e specifica il nome esatto del passo registrato nel C++.
 
-Esempio per Assignment 1 (es. Algebraic Identity):
+Esempio per Assignment 1 (es. Algebraic Identity,Strength Reduction,Multi Instruction Optimization):
 
 ```
-opt -load-pass-plugin=../build/libAssignment1.so -passes=NOME_DEL_PASSO -S TestSuiteAi.ll -o TestSuiteAi_ottimizzato.ll
+
+opt -load-pass-plugin=../build/libAssignment1.so -passes=ai -S TestSuiteAi.ll -o TestSuiteAi_ottimizzato.ll
+
+opt -load-pass-plugin=../build/libAssignment1.so -passes=sr -S TestSuiteSr.ll -o TestSuiteSr_ottimizzato.ll
+
+opt -load-pass-plugin=../build/libAssignment1.so -passes=mi -S TestSuiteMi.ll -o TestSuiteMi_ottimizzato.ll
 ```
+
 Esempio per Assignment 4 (Loop Fusion):
 
 ```
-opt -load-pass-plugin=../build/LoopFusionPass.so -passes=NOME_DEL_PASSO -S TestSuiteLF.m2r.ll -o TestSuiteLF.optimized.ll
+
+opt -load-pass-plugin=../build/LoopFusionPass.so -passes="LoopFusionPass" TestSuiteLF.m2r.ll -S -o TestSuiteLF.optimized.ll
+```
+
+
+Esempio per Assignment 3 (LICM):
+
+```
+opt -load-pass-plugin=../build/LoopPass.so -passes=LoopPass -S TestSuiteLICM.m2r.ll -o TestSuiteLICM.optimized.ll
 ```
