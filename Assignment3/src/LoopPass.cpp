@@ -13,6 +13,7 @@
 // Runnare il passo con 'opt':
 //      [Only logs]:  opt -load-pass-plugin=./libLoopPass.so -passes="LoopPass" -disable-output [irname]
 //      [Emit IR]:    opt -load-pass-plugin=./libLoopPass.so -passes="LoopPass" [irname] -S -o out.ll
+//LoopPass.so
 //=============================================================================
 
 
