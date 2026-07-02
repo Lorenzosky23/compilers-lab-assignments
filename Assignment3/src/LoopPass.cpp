@@ -39,9 +39,12 @@ struct LoopPass : public PassInfoMixin<LoopPass> {
     
     // Funzione ausiliaria per verificare se un operando (Value) è "Loop-Invariant"
     // Ritorna 'true' se il valore non cambia mai durante l'esecuzione del ciclo.
+
+    // V: L'operando che stiamo analizzando. L: Il puntatore al ciclo (Loop) corrente.
+    // Invariants: Il set di istruzioni che abbiamo già verificato essere loop-invariant nelle iterazioni precedenti.
     bool isValueInvariant(Value *V, Loop *L, const std::set<Instruction*> &Invariants) {
         
-        // Caso 1: Se l'operando è una Costante letterale (es. il numero 42) o un
+        // Caso 1: Se l'operando è una Costante letterale o un
         // Argomento della funzione, il suo valore è fissato prima che il programma 
         // entri nel loop -> È  invariante.
         if (isa<Constant>(V) || isa<Argument>(V)) {
@@ -51,10 +54,13 @@ struct LoopPass : public PassInfoMixin<LoopPass> {
         // Se è un'istruzione, verifichiamo dove è definita
         if (Instruction *I = dyn_cast<Instruction>(V)) {
             // Se è definita fuori dal loop, è invariante
+            //I->getParent() restituisce il BasicBlock in cui risiede l'istruzione
+            //  che ha generato il nostro operando. Chiamando L->contains(...), chiediamo al loop se quel blocco si trova al suo interno. 
+            // Se non è contenuto nel loop, significa che l'operando è stato calcolato prima di entrarvi. È quindi invariante, e ritorniamo true.
             if (!L->contains(I->getParent())) {
                 return true;
             }
-            // Se è definita dentro, è invariante solo se è già stata marcata come invariante
+            // Se è definita dentro il Loop, è invariante solo se è già stata marcata come invariante
             if (Invariants.count(I)) {
                 return true;
             }
@@ -111,6 +117,9 @@ struct LoopPass : public PassInfoMixin<LoopPass> {
             // Poiché un'istruzione invariante 'B' potrebbe dipendere da una 'A' posta più in alto,
             // usiamo un approccio iterativo a strati (do-while) finché l'insieme smette di crescere.
             
+
+            //Dichiara l'insieme (set) che conterrà i puntatori a tutte le istruzioni riconosciute come invarianti. 
+            // L'uso di un std::set garantisce che ogni istruzione sia presente una sola volta.
             std::set<Instruction*> InvariantInstructions;
             bool NewInvariantFound;
 
@@ -142,7 +151,10 @@ struct LoopPass : public PassInfoMixin<LoopPass> {
 
                         // Verifica Data-Flow: Un'istruzione è invariante se e solo se
                         // TUTTI i suoi operandi in input sono a loro volta invarianti.
+
+                        //Assumiamo che l'istruzione sia invariante finché non dimostriamo il contrario analizzando i suoi ingressi.
                         bool AllOperandsInvariant = true;
+
                         for (auto &Op : I.operands()) {
                             if (!isValueInvariant(Op.get(), L, InvariantInstructions)) {
                                 AllOperandsInvariant = false;
@@ -161,9 +173,9 @@ struct LoopPass : public PassInfoMixin<LoopPass> {
 
             
             // CONDIZIONI DI DOMINANZA ED EVENTUALE CODE MOTION
-           
-
-
+           // SmallVector è una classe  creata da LLVM per essere più veloce del classico std::vector del C++. 
+           // allochiamo lo spazio per 4 puntatori direttamente sullo stack, 
+           // nel caso il ciclo avesse più uscite verra allocata automaticametne memoria".
             SmallVector<BasicBlock*, 4> ExitBlocks;
             L->getExitBlocks(ExitBlocks);// Recuperiamo tutti i blocchi d'uscita del loop.
 
@@ -172,6 +184,7 @@ struct LoopPass : public PassInfoMixin<LoopPass> {
             // una dipendenza 'B' nel preheader prima della sua istruzione madre 'A'.
 
             // Manteniamo l'ordine di dipendenza usando un vettore per lo spostamento
+            // contiene i puntatori alle istruzioni candidate
             std::vector<Instruction*> InstructionsToMove;
 
             for (BasicBlock *BB : L->blocks()) {
@@ -186,6 +199,7 @@ struct LoopPass : public PassInfoMixin<LoopPass> {
                         // avrebbe terminato prima di incontrarla.
                         bool DominatesAllExits = true;
                         for (BasicBlock *ExitBB : ExitBlocks) {
+                            //il blocco in cui risiede la nostra istruzione (I.getParent()) domina il blocco di uscita ExitBB?
                             if (!DT.dominates(I.getParent(), ExitBB)) {
                                 DominatesAllExits = false;
                                 break;
@@ -198,9 +212,11 @@ struct LoopPass : public PassInfoMixin<LoopPass> {
                         if (!DominatesAllExits) {
                             // verifichiamo se è "dead" fuori dal loop
                             bool UsedOutsideLoop = false;
+                            //ogni Value tiene traccia di chi lo sta usando (la def-use chain). 
+                            // Con I.users(), iteriamo su tutte le altre istruzioni nel programma che hanno I come loro operando di input.
                             for (User *U : I.users()) {
                                 if (Instruction *UserInst = dyn_cast<Instruction>(U)) {
-                                    //Se c'è anche un solo utilizzo di UserInst in un blocco che non fa parte del loop
+                                    //Se c'è anche un solo utilizzo di UserInst in un blocco che non fa parte del loop usciamo
                                     if (!L->contains(UserInst->getParent())) {
                                         UsedOutsideLoop = true;
                                         break;

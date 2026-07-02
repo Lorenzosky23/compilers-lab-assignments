@@ -4,14 +4,13 @@
 // COMANDO PER TESTARE IL PASSO DA TERMINALE:
 //
 // 1. Genera l'IR grezzo:
-//    clang -O0 -Xclang -disable-O0-optnone -emit-llvm -S test_loop_fusion.c -o raw.ll
+//    clang -O0 -Xclang -disable-O0-optnone -emit-llvm -S TestSuiteLF.c -o TestSuiteLF.ll
 //
-// 2. Esegui la normalizzazione pre-flight (SSA + LoopSimplifyForm):
-//    opt -passes="mem2reg,simplifycfg,loop-simplify" raw.ll -S -o clean.ll
+// 2. 
+//   opt -passes=mem2reg TestSuiteLF.ll -S -o TestSuiteLF.m2r.ll
 //
-// 3. Lancia il tuo passo guardando i log di debug:
-//    opt -load-pass-plugin=./build/libLoopFusionPass.so -passes="LoopFusionPass" 
-//        -debug-only="my-loop-fusion" -disable-output clean.ll
+// 3. Lancia il tuo passo 
+//   opt -load-pass-plugin=../build/LoopFusionPass.so -passes="LoopFusionPass" TestSuiteLF.m2r.ll -S -o TestSuiteLF.optimized.ll
 //=============================================================================
 
 extern void side_effect_print(); // Funzione esterna fittizia per i test di disturbo

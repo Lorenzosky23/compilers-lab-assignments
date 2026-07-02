@@ -216,84 +216,78 @@ bool isControlFlowEquivalent(Loop &L1, Loop &L2, DominatorTree &DT, PostDominato
 }
 
 // REQUISITO 4: ASSENZA DI DIPENDENZE A DISTANZA NEGATIVA 
-//Non possono sussistere dipendenze di distanza negative tra Lj e Lk
-// Una dipendenza di distanza negativa tra Lj e Lk (con Lj che precede Lk
-// si verifica quando, all'iterazione m, Lk utilizza un valore calcolato da Lj
-// in una successiva iterazione m+n (dove n > 0).
+// Non possono sussistere dipendenze di distanza negative tra Lj e Lk.
+// Una dipendenza a distanza negativa si verifica quando in corrispondenza 
+// di un'iterazione m del loop l'istruzione nel loop Lk utilizza un valore 
+// che nel primo loop viene calcolato a un'iterazione successiva.
 bool haveNotNegativeMemoryDependencies(Loop &L1, Loop &L2, ScalarEvolution &SE) {
-    outs () << "4) dipendenze negative?\n";
+    outs() << "4) Controllo dipendenze negative\n";
     
+    //esplorazione del primo ciclo e ricerca indirizzi
+    //cerca l istruzione di tipo GetElementPtrInst che calcola gli offset di memoria
     for (BasicBlock* BB : L1.blocks()) {
         for (Instruction &I : *BB) {
-            //Cerca le istruzioni GetElementPtrInst (GEP). In LLVM, il GEP è l'istruzione che calcola gli indirizzi di memoria (come fare Array[i]). 
-            // Se l'istruzione non è un GEP, passa alla successiva (continue).
+            
             auto *storeGEP = dyn_cast<GetElementPtrInst>(&I);
             if (!storeGEP) continue;
 
-            //Verifica se l'istruzione subito successiva al GEP è uno StoreInst
-            auto *storeInst = dyn_cast<StoreInst>(storeGEP->getNextNode()); 
+            // Ricerca dello Store
+            // Una volta trovato un GEP, dobbiamo essere sicuri che serva effettivamente per scrivere in memoria. il codice interroga la Def-Use chain (storeGEP->users()).ù
+            // per vedere quali altre istruzioni stanno usando l'indirizzo, 
+            // Se tra gli utilizzatori c'è una StoreInst continuiamo. 
+            StoreInst *storeInst = nullptr;
+            for (User *U : storeGEP->users()) {
+                if (auto *SI = dyn_cast<StoreInst>(U)) {
+                    storeInst = SI;
+                    break; 
+                }
+            }
             if (!storeInst) continue; 
 
-            //prende il puntatore base dell'array usato dal GEP e inizia a cercare tutti gli altri posti nel programma in cui viene usato.
+            //Ora abbiamo l'operazione di scrittura in L1. 
+            // Dobbiamo capire se L2 tenta di accedere allo stesso array.
+            //Il codice prende il "Puntatore Base" dell'array tramite getPointerOperand() 
+            // e ne cerca tutti gli utilizzi nel programma. Se trova un utilizzo che:
+            //Si trova fisicamente all'interno del secondo loop (L2.contains(user)).
+            //ed è a sua volta un calcolo di indirizzo (GetElementPtrInst).
+            //Allora abbiamo un potenziale conflitto: Bisogna calcolare la distanza.
             for (auto &U : storeGEP->getPointerOperand()->uses()) {
                 Instruction* user = dyn_cast<Instruction>(U.getUser());
-                //Se chi sta usando quell'array non è un'istruzione, o se si trova fuori dal Loop 2, lo ignora
                 if (!user || !L2.contains(user)) continue; 
-                //Verifica che l'uso dentro L2 sia anch'esso un calcolo di indirizzi (GEP). Ora abbiamo i due contendenti: storeGEP (dove scrive L1) e storeOrLoadGEP (dove legge/scrive L2).
+                
                 auto *storeOrLoadGEP = dyn_cast<GetElementPtrInst>(user);
                 if (!storeOrLoadGEP) continue;
 
-           
-                outs() << "   Istruzione di Store che segue il GEP: " << *storeGEP << "\n";
-                outs() << "   Istruzione di Load che segue il secondo GEP:  " << *storeOrLoadGEP << "\n";
+                outs() << "   GEP in L1 (Store): " << *storeGEP << "\n";
+                outs() << "   GEP in L2 (Load/Store):  " << *storeOrLoadGEP << "\n";
 
-                //Chiede a SCEV di calcolare le equazioni che descrivono come cambiano questi due indirizzi di memoria durante i rispettivi cicli.
-                const SCEV *storeSCEV = SE.getSCEVAtScope(storeGEP, &L1);
-                //Calcola matematicamente la Distanza: sottrae l'equazione dell'indirizzo di L1 da quella di L2 (Diff = L2 - L1).
-                const SCEV *storeOrLoadSCEV = SE.getSCEVAtScope(storeOrLoadGEP, &L2);
-                
-                if (isa<SCEVCouldNotCompute>(storeSCEV) || isa<SCEVCouldNotCompute>(storeOrLoadSCEV)) continue;
+              // Otteniamo le espressioni ricorrenti (AddRec) per i due puntatori
+              //chiediamo a ScalarEvolution di tradurre i due calcoli di indirizzo in equazioni matematiche (SCEV).
+              // Il cast a SCEVAddRecExpr serve a verificare che l'indirizzo evolva in modo lineare e prevedibile a ogni iterazione del loop
+                const SCEV *storeSCEV = SE.getSCEV(storeGEP);
+                const SCEV *loadSCEV = SE.getSCEV(storeOrLoadGEP);
 
-                const SCEV *Diff = SE.getMinusSCEV(storeOrLoadSCEV, storeSCEV);
+                auto *storeAddRec = dyn_cast<SCEVAddRecExpr>(storeSCEV);
+                auto *loadAddRec = dyn_cast<SCEVAddRecExpr>(loadSCEV);
 
-                outs() << "   SCEV Normalizzata Store: " << *storeSCEV << "\n"; 
-                outs() << "   SCEV Normalizzata Load:  " << *storeOrLoadSCEV << "\n";
-                outs() << "   Differenza SCEV Diff:  " << *Diff << "\n";
+                if (storeAddRec && loadAddRec) {
+                    // Estraiamo il punto di partenza (l'offset iniziale) delle due equazioni
+                    const SCEV *startStore = storeAddRec->getStart();
+                    const SCEV *startLoad = loadAddRec->getStart();
 
-                const SCEV *temp = Diff; 
-                const SCEVConstant *ConstDiff = dyn_cast<SCEVConstant>(temp);
-                
-                // Discesa Type-Safe nell'albero SCEV per LLVM 19
-                // 1. RICERCA DELL'OFFSET (Distanza iniziale tra gli indici)
-                while (temp && !ConstDiff) {
-                    if (const auto *NAry = dyn_cast<SCEVNAryExpr>(temp)) temp = NAry->getOperand(0);
-                    else if (const auto *Cast = dyn_cast<SCEVCastExpr>(temp)) temp = Cast->getOperand(0);
-                    else break; 
-                    ConstDiff = dyn_cast<SCEVConstant>(temp);
-                }
-                
-                if (!ConstDiff) continue;
+                    // Calcola la differenza matematica pura tra gli indirizzi referenziati
+                    const SCEV *minusSCEV = SE.getMinusSCEV(startStore, startLoad);
+                    outs() << "   Differenza pura (Store - Load):  " << *minusSCEV << "\n";
 
-                int offset = ConstDiff->getValue()->getSExtValue();
-                outs() << "   Offset: " << offset << "\n";
-                
-                // 2. RICERCA DELLO STEP (Di quanto si sposta l'indice a ogni iterazione)
-                const SCEVAddRecExpr *DiffRec = dyn_cast<SCEVAddRecExpr>(Diff);
-                if (!DiffRec) continue;
-
-                const SCEVConstant *ConstStep = dyn_cast<SCEVConstant>(DiffRec->getStepRecurrence(SE));
-                if (!ConstStep) continue;
-
-                int step = ConstStep->getValue()->getSExtValue();
-                outs() << "   Step : " << step << "\n";
-                
-
-                // Se lo step e l'offset vanno nella stessa direzione (entrambi positivi o entrambi negativi),
-                // significa che L2 sta cercando di leggere un dato (es. Array[i+1]) che L1 scriverà solo "nel futuro" 
-                // (all'iterazione successiva). Questo romperebbe il programma
-                if ((step > 0 && offset > 0) || (step < 0 && offset < 0)) {
-                    outs() << "-> Dipendenza negativa trovata a causa dell'offset " << offset << " con passo " << step << "\n";
-                    return false; 
+                    // Determina la negatività 
+                    if (SE.isKnownNegative(minusSCEV)) {
+                        outs() << "-> Dipendenza a distanza negativa. Fusione bloccata.\n";
+                        return false; 
+                    }
+                } else {
+                    // Fallback conservativo se l'accesso alla memoria è troppo complesso
+                    outs() << "-> Equazione SCEV non lineare. Fusione bloccata per sicurezza.\n";
+                    return false;
                 }
             }  
         } 
