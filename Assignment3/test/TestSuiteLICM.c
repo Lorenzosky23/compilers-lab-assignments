@@ -8,7 +8,7 @@
 
 // TEST 1: 
 // Obiettivo: Mette alla prova il controllo "L'istruzione è Dead fuori dal loop?"
-//In un while classico, il blocco base che contiene il corpo del ciclo non domina 
+// In un while classico, il blocco base che contiene il corpo del ciclo non domina 
 // l'uscita (perché il ciclo potrebbe fare zero iterazioni e saltare direttamente alla fine). 
 // Tuttavia, siccome inv è usata solo per calcolare acc dentro il ciclo, 
 // è "dead" (morta) all'esterno. Il passo dovrebbe spostarla con successo.
@@ -24,7 +24,7 @@ int test_while_classic(int a, int b, int N) {
     return acc;
 }
 
-// TEST 2: I
+// TEST 2: 
 // Obiettivo: Mette alla prova la dominanza diretta e il ciclo 'do-while' interno al Pass
 //Il passo dovrebbe scoprire prima step1, poi ricomincerà il ciclo di ricerca,
 //  scoprirà step2 (che ora ha operandi invarianti),e sposterà entrambe mantenendo l'ordine corretto.
@@ -62,3 +62,13 @@ int test_trap_if(int base, int moltiplicatore, int limite, int condizione_estern
     return val; // 'val' viene usata qui fuori! Se venisse spostata nel preheader, 
                 // verrebbe calcolata anche quando 'condizione_esterna <= 10' (ERRORE!).
 }
+
+
+//Poiché la moltiplicazione in sé è un'operazione totalmente sicura 
+// (non causa mai crash,LICM si accorgerà che %mul è invariante e lo sposterà nel Preheader 
+//Il nodo phi rimarrà nel ciclo a garantire la semantica dell'If, ma il calcolo verrà estratto. 
+// Il test verrebbe "fallito" (nel senso che l'ottimizzazione avverrebbe comunque).
+
+//Come risolvere?
+//Per bloccare la Code Motion, si deve usare un'istruzione che non è speculativamente sicura,
+// ovvero un'istruzione che causerebbe un crash se venisse spostata nel Preheader ed eseguita a sproposito.

@@ -45,7 +45,7 @@ struct StrengthReductionPass : PassInfoMixin<StrengthReductionPass> {
             ConstantInt *constOp = nullptr;
             Value *varOp = nullptr;
 
-            // GESTIONE COMMUTATIVITÀ PULITA E LINEARE:
+           
             // Guardiamo a destra. Se c'è un numero fisso, la variabile è a sinistra.
             if (auto *c = dyn_cast<ConstantInt>(op2)) {
               constOp = c;

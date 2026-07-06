@@ -225,13 +225,15 @@ struct LoopPass : public PassInfoMixin<LoopPass> {
                                 }
                             }
 
-                            if (UsedOutsideLoop) {
-                                // Fallisce: Non domina le uscite ed è usata fuori
-                                continue;
-                            } else {
-                                errs() << "L'istruzione [" << I << "] e' dead fuori dal loop, quindi posso spostarla\n";
-                            }
-                        }
+                           if (UsedOutsideLoop) {
+                                       
+                                        errs() << "L'istruzione [" << I << "] NON domina le uscite ed e' usata fuori -> NON SPOSTABILE\n";
+                                        continue;
+                                    } else {
+                                 
+                                        errs() << "L'istruzione [" << I << "] non domina le uscite ma e' dead fuori dal loop -> procedo coi controlli...\n";
+                                    }
+                                }
 
                         // La definizione domina tutti i blocchi in cui viene usata nel loop
                         bool DominatesAllUses = true;
@@ -250,10 +252,10 @@ struct LoopPass : public PassInfoMixin<LoopPass> {
                         }
 
                         if (!DominatesAllUses) {
-                            // Fallisce: Non domina tutti i suoi usi interni
+                            errs() << "L'istruzione [" << I << "] NON domina tutti i suoi usi interni -> NON SPOSTABILE\n";
                             continue;
                         } else {
-                            errs() << "L'istruzione [" << I<< "] si puo' spostare (domina tutti i suoi usi): \n";    
+                            errs() << "L'istruzione [" << I<< "] ha superato tutti i controlli -> IN CODA PER LO SPOSTAMENTO\n";
                         }
 
                         // Superate le verifiche, l'istruzione è candidata allo spostamento
