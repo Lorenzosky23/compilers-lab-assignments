@@ -7,11 +7,13 @@
 //=============================================================================
 
 // TEST 1: 
-// Obiettivo: Mette alla prova il controllo "L'istruzione è Dead fuori dal loop?"
-// In un while classico, il blocco base che contiene il corpo del ciclo non domina 
-// l'uscita (perché il ciclo potrebbe fare zero iterazioni e saltare direttamente alla fine). 
-// Tuttavia, siccome inv è usata solo per calcolare acc dentro il ciclo, 
-// è "dead" (morta) all'esterno. Il passo dovrebbe spostarla con successo.
+// Scopo: Verificare la distinazionr fra "istruzioni Loop Invariant " e "Istruzioni spostabili"
+// Istruzione da analizzare: int inv = a*b
+// - loop invariant: 'a' e 'b' sono parametri della funzione, quindi definiti fuori dal loop
+// - controllo code motion: il blocco contenente 'a*b' deve dominare tutte le uscite ma in un while
+//   deve essere sempre verificata la condizone: se nella prima iterazione la condizione è falsa allora 
+//   non viene mai eseguito
+// Output: Trovata istruzione loop invariant a*b, non domina tutte le uscite --> NON SPOSTABILE
 int test_while_classic(int a, int b, int N) {
     int i = 0;
     int acc = 0;
@@ -25,9 +27,12 @@ int test_while_classic(int a, int b, int N) {
 }
 
 // TEST 2: 
-// Obiettivo: Mette alla prova la dominanza diretta e il ciclo 'do-while' interno al Pass
-//Il passo dovrebbe scoprire prima step1, poi ricomincerà il ciclo di ricerca,
-//  scoprirà step2 (che ora ha operandi invarianti),e sposterà entrambe mantenendo l'ordine corretto.
+// Scopo: Verificare che il pass riesca a riconoscere anche istruzioni invarianti che dipendono da altre istruzioni
+// già riconosciute come invarianti
+// Istruzioni da analizzare: step = x + y , step2 = step << 2 
+// STEP --> loop invariant: si perchè 'x' e 'y' sono parametri della funzione 
+// STEP2 --> loop invariant: si perchè step1 è definito dentro la funzione ma è loop invariant, '2' è costante
+// Output: Spostabili entrambe 
 int test_dowhile_chain(int x, int y) {
     int i = 0;
     int res = 0;
@@ -43,12 +48,11 @@ int test_dowhile_chain(int x, int y) {
 }
 
 // TEST 3: 
-// Obiettivo: Mette alla prova il fallimento della Code Motion (codice illegale da spostare)
-// ci aspettiamo che il passo identifichi la moltiplicazione (base * moltiplicatore) come invariante 
-// e ne calcoli correttamente la "morte" all'esterno del ciclo. 
-// Tuttavia, lo spostamento deve fallire all'ultimo filtro di sicurezza (DominatesAllUses). 
-// Trovandosi in un ramo condizionale, la definizione dell'istruzione non domina il nodo phi di ricongiungimento a valle. 
-// Ci aspettiamo che il passo scarti l'istruzione, lasciandola all'interno del loop per preservare la semantica e la correttezza del programma.
+// Scopo: Verificare che un'istruzione possa essere riconosciuta come loop invariant ma essere scartata durante la code motion
+// Istruzioni: condizione_esterna>10 (diventa icmp in LLVM), val = base * moltiplicatore
+// Loop invariant --> entrambe: dipendono dai parametri della funzione
+// Code motion --> sono all'interno di un percorso condizionale, quindi non dominano tutte le uscite
+// Output --> Non spostabile per entrambe
 int test_trap_if(int base, int moltiplicatore, int limite, int condizione_esterna) {
     int i = 0;
     int val = 0;
@@ -62,13 +66,3 @@ int test_trap_if(int base, int moltiplicatore, int limite, int condizione_estern
     return val; // 'val' viene usata qui fuori! Se venisse spostata nel preheader, 
                 // verrebbe calcolata anche quando 'condizione_esterna <= 10' (ERRORE!).
 }
-
-
-//Poiché la moltiplicazione in sé è un'operazione totalmente sicura 
-// (non causa mai crash,LICM si accorgerà che %mul è invariante e lo sposterà nel Preheader 
-//Il nodo phi rimarrà nel ciclo a garantire la semantica dell'If, ma il calcolo verrà estratto. 
-// Il test verrebbe "fallito" (nel senso che l'ottimizzazione avverrebbe comunque).
-
-//Come risolvere?
-//Per bloccare la Code Motion, si deve usare un'istruzione che non è speculativamente sicura,
-// ovvero un'istruzione che causerebbe un crash se venisse spostata nel Preheader ed eseguita a sproposito.
