@@ -56,8 +56,10 @@ struct LoopPass : public PassInfoMixin<LoopPass> {
         if (Instruction *I = dyn_cast<Instruction>(V)) {
             // Se è definita fuori dal loop, è invariante
             //I->getParent() restituisce il BasicBlock in cui risiede l'istruzione
-            //  che ha generato il nostro operando. Chiamando L->contains(...), chiediamo al loop se quel blocco si trova al suo interno. 
-            // Se non è contenuto nel loop, significa che l'operando è stato calcolato prima di entrarvi. È quindi invariante, e ritorniamo true.
+            //  che ha generato il nostro operando. Chiamando L->contains(...), chiediamo al loop se quel 
+            // blocco si trova al suo interno. 
+            // Se non è contenuto nel loop, significa che l'operando è stato calcolato prima di entrarvi. 
+            // È quindi invariante, e ritorniamo true.
             if (!L->contains(I->getParent())) {
                 return true;
             }
@@ -153,7 +155,8 @@ struct LoopPass : public PassInfoMixin<LoopPass> {
                         // Verifica Data-Flow: Un'istruzione è invariante se e solo se
                         // TUTTI i suoi operandi in input sono a loro volta invarianti.
 
-                        //Assumiamo che l'istruzione sia invariante finché non dimostriamo il contrario analizzando i suoi ingressi.
+                        //Assumiamo che l'istruzione sia invariante finché non dimostriamo il contrario analizzando 
+                        // i suoi ingressi.
                         bool AllOperandsInvariant = true;
 
                         for (auto &Op : I.operands()) {
@@ -207,46 +210,43 @@ struct LoopPass : public PassInfoMixin<LoopPass> {
                             }
                         }
                         
-                        // Se l'istruzione NON domina le uscite, possiamo spostarla ugualmente
-                        // a patto che il suo risultato sia "morto" (dead) all'esterno, ossia se
-                        // nessun basic block fuori dal loop utilizzerà mai questo registro.
+                        // CONDIZIONE 1 PER LA CODE MOTION:
+                        // Il blocco contenente l'istruzione deve dominare tutte le uscite del loop.
                         if (!DominatesAllExits) {
-                            // verifichiamo se è "dead" fuori dal loop
-                            bool UsedOutsideLoop = false;
-                            //ogni Value tiene traccia di chi lo sta usando (la def-use chain). 
-                            // Con I.users(), iteriamo su tutte le altre istruzioni nel programma che hanno I come loro operando di input.
-                            for (User *U : I.users()) {
-                                if (Instruction *UserInst = dyn_cast<Instruction>(U)) {
-                                    //Se c'è anche un solo utilizzo di UserInst in un blocco che non fa parte del loop usciamo
-                                    if (!L->contains(UserInst->getParent())) {
-                                        UsedOutsideLoop = true;
-                                        break;
-                                    }
-                                }
+                            errs() << "L'istruzione [" << I
+                                << "] NON domina tutte le uscite del loop -> NON SPOSTABILE\n";
+                            continue;
+                        }
+
+                        // CONDIZIONE 2 PER LA CODE MOTION:
+                        // Non devono esserci altre definizioni della variabile nel loop.
+                        // Poiché il pass lavora su IR in forma SSA (dopo mem2reg),
+                        // ogni Value SSA possiede per definizione una sola definizione.
+                        // Non è quindi necessario calcolare esplicitamente altre reaching definitions.
+
+                        // CONDIZIONE 3 PER LA CODE MOTION:
+                        // La definizione deve dominare tutti i suoi usi interni al loop.
+                        // Usiamo direttamente gli oggetti Use, perché LLVM gestisce correttamente
+                        // anche il caso particolare dei PHI node, dove l'uso avviene sull'arco
+                        // entrante e non semplicemente nel BasicBlock che contiene il PHI.
+                        bool DominatesAllUses = true;
+
+                        for (Use &U : I.uses()) {
+
+                            Instruction *UserInst = dyn_cast<Instruction>(U.getUser());
+
+                            if (!UserInst) {
+                                continue;
                             }
 
-                           if (UsedOutsideLoop) {
-                                       
-                                        errs() << "L'istruzione [" << I << "] NON domina le uscite ed e' usata fuori -> NON SPOSTABILE\n";
-                                        continue;
-                                    } else {
-                                 
-                                        errs() << "L'istruzione [" << I << "] non domina le uscite ma e' dead fuori dal loop -> procedo coi controlli...\n";
-                                    }
-                                }
+                            // Ci interessano solo gli usi interni al loop
+                            if (L->contains(UserInst->getParent())) {
 
-                        // La definizione domina tutti i blocchi in cui viene usata nel loop
-                        bool DominatesAllUses = true;
-                        for (User *U : I.users()) {
-                            if (Instruction *UserInst = dyn_cast<Instruction>(U)) {
-                                // Ci interessano solo gli usi interni al loop
-                                if (L->contains(UserInst->getParent())) {
-                                    
-                                    if (!DT.dominates(I.getParent(), UserInst->getParent())) {
-                                        DominatesAllUses = false;
-                                        break;
-                                    }
-                                
+                                // Verifica se la definizione I domina questo specifico uso.
+                                // Questa versione di dominates() gestisce correttamente anche i PHI.
+                                if (!DT.dominates(&I, U)) {
+                                    DominatesAllUses = false;
+                                    break;
                                 }
                             }
                         }
@@ -282,7 +282,8 @@ struct LoopPass : public PassInfoMixin<LoopPass> {
             }
         }
 
-        // Se abbiamo modificato il codice, notifichiamo LLVM che i vecchi passaggi di analisi CFG potrebbero non essere puliti
+        // Se abbiamo modificato il codice, notifichiamo LLVM che i vecchi passaggi di 
+        // analisi CFG potrebbero non essere puliti
         return Changed ? PreservedAnalyses::none() : PreservedAnalyses::all();
     }
 };
