@@ -119,7 +119,6 @@ struct LoopPass : public PassInfoMixin<LoopPass> {
             // Cerchiamo le istruzioni all'interno del loop i cui operandi sono invarianti.
             // Poiché un'istruzione invariante 'B' potrebbe dipendere da una 'A' posta più in alto,
             // usiamo un approccio iterativo a strati (do-while) finché l'insieme smette di crescere.
-            
 
             //Dichiara l'insieme (set) che conterrà i puntatori a tutte le istruzioni riconosciute come invarianti. 
             // L'uso di un std::set garantisce che ogni istruzione sia presente una sola volta.
@@ -194,13 +193,11 @@ struct LoopPass : public PassInfoMixin<LoopPass> {
             for (BasicBlock *BB : L->blocks()) {
                 for (Instruction &I : *BB) {
                     if (InvariantInstructions.count(&I)) {
-                        
+
+                        // CONDIZIONE 1: REQUISITO DI DOMINANZA SULLE USCITE
                         // Verifico se il blocco dell'istruzione domina tutte le uscite del loop
-                        // REQUISITO DI DOMINANZA SULLE USCITE:
-                        // L'istruzione deve trovarsi in un blocco che "domina" tutte le uscite.
-                        // Se così non fosse, spostarla nel
-                        // preheader significherebbe farla eseguire SEMPRE, anche quando il loop
-                        // avrebbe terminato prima di incontrarla.
+                        // Se non è cosi, spostarla nel pre-header significherebbe farla eseguire sempre
+                        //(anche se il loop termina prima di incontrarla)
                         bool DominatesAllExits = true;
                         for (BasicBlock *ExitBB : ExitBlocks) {
                             //il blocco in cui risiede la nostra istruzione (I.getParent()) domina il blocco di uscita ExitBB?
@@ -209,30 +206,30 @@ struct LoopPass : public PassInfoMixin<LoopPass> {
                                 break;
                             }
                         }
-                        
-                        // CONDIZIONE 1 PER LA CODE MOTION:
-                        // Il blocco contenente l'istruzione deve dominare tutte le uscite del loop.
+
                         if (!DominatesAllExits) {
                             errs() << "L'istruzione [" << I
                                 << "] NON domina tutte le uscite del loop -> NON SPOSTABILE\n";
                             continue;
                         }
 
-                        // CONDIZIONE 2 PER LA CODE MOTION:
+                        // CONDIZIONE 2: REQUISITO DI ALTRE DEFINIZIONI
                         // Non devono esserci altre definizioni della variabile nel loop.
                         // Poiché il pass lavora su IR in forma SSA (dopo mem2reg),
                         // ogni Value SSA possiede per definizione una sola definizione.
                         // Non è quindi necessario calcolare esplicitamente altre reaching definitions.
 
-                        // CONDIZIONE 3 PER LA CODE MOTION:
+                        // CONDIZIONE 3: REQUISITO DI TUTTI GLI USI
                         // La definizione deve dominare tutti i suoi usi interni al loop.
                         // Usiamo direttamente gli oggetti Use, perché LLVM gestisce correttamente
                         // anche il caso particolare dei PHI node, dove l'uso avviene sull'arco
                         // entrante e non semplicemente nel BasicBlock che contiene il PHI.
                         bool DominatesAllUses = true;
 
+                        // scorro tutte le istruzioni che usano I
                         for (Use &U : I.uses()) {
 
+                            // controllo se siano istruzioni, se non lo sono vado avanti
                             Instruction *UserInst = dyn_cast<Instruction>(U.getUser());
 
                             if (!UserInst) {
@@ -243,7 +240,6 @@ struct LoopPass : public PassInfoMixin<LoopPass> {
                             if (L->contains(UserInst->getParent())) {
 
                                 // Verifica se la definizione I domina questo specifico uso.
-                                // Questa versione di dominates() gestisce correttamente anche i PHI.
                                 if (!DT.dominates(&I, U)) {
                                     DominatesAllUses = false;
                                     break;
